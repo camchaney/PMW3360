@@ -22,7 +22,7 @@
 
 #define BEGIN_COM digitalWrite(_ss, LOW); delayMicroseconds(1)
 #define END_COM   delayMicroseconds(1); digitalWrite(_ss, HIGH)
-#define SPI_BEGIN SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE3))
+#define SPI_BEGIN SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE3))
 #define SPI_END   SPI.endTransaction()
 
 const unsigned short firmware_length = 4094;
