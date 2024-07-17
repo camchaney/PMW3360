@@ -1,5 +1,5 @@
 /*
-  PMW3360.cpp - Library for interfacing PMW3360 motion sensor module (mod by me)
+  PMW3360_router.cpp - Library for interfacing PMW3360 motion sensor module (mod by me)
 
   Copyright (c) 2019, Sunjun Kim (modded by Cameron Chaney)
   
@@ -18,7 +18,7 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "PMW3360.h"
+#include "PMW3360_router.h"
 
 #define BEGIN_COM digitalWrite(_ss, LOW); delayMicroseconds(1)
 #define END_COM   delayMicroseconds(1); digitalWrite(_ss, HIGH)
@@ -462,75 +462,6 @@ PMW3360_DATA PMW3360::readBurst()
 
   return data;
 }
-
-// public
-/* 
-readBurst_simple: get one frame of xy motion data. (from original code)
-
-# retrun
-type: PMW3360_DATA
-*/
-PMW3360_DATA PMW3360::readBurst_simple()
-{
-  unsigned long fromLast = micros() - _lastBurst;
-  byte burstBuffer[12];
-  
-  SPI_BEGIN;
-  
-  if(!_inBurst || fromLast > 500*1000)
-  {
-    adns_write_reg(REG_Motion_Burst, 0x00);
-    _inBurst = true;    
-  }
-
-  BEGIN_COM;
-  SPI.transfer(REG_Motion_Burst);    
-  delayMicroseconds(35); // waits for tSRAD  
-
-  SPI.transfer(burstBuffer, 12); // read burst buffer
-  delayMicroseconds(1); // tSCLK-NCS for read operation is 120ns
-
-  END_COM;
-  SPI_END;
-
-  if(burstBuffer[0] & 0b111) // panic recovery, sometimes burst mode works weird.
-  {
-    _inBurst = false;
-  }
-
-  _lastBurst = micros();
-
-  PMW3360_DATA data;
-
-  bool motion = (burstBuffer[0] & 0x80) != 0;
-  bool surface = (burstBuffer[0] & 0x08) == 0;   // 0 if on surface / 1 if off surface
-
-  uint8_t xl = burstBuffer[2];    // dx LSB
-  uint8_t xh = burstBuffer[3];    // dx MSB
-  uint8_t yl = burstBuffer[4];    // dy LSB
-  uint8_t yh = burstBuffer[5];    // dy MSB
-  uint8_t sl = burstBuffer[10];   // shutter LSB
-  uint8_t sh = burstBuffer[11];   // shutter MSB
-  
-  // int x = xh<<8 | xl;      // = xh*(2^8)
-  // int y = yh<<8 | yl;
-  int x = xl;
-  int y = yl;
-  unsigned int shutter = sh<<8 | sl;
-
-  data.isMotion = motion;
-  data.isOnSurface = surface;
-  data.dx = x;
-  data.dy = y;
-  data.SQUAL = burstBuffer[6];
-  data.rawDataSum = burstBuffer[7];
-  data.maxRawData = burstBuffer[8];
-  data.minRawData = burstBuffer[9];
-  data.shutter = shutter;
-
-  return data;
-}
-
 
 // public
 /* 

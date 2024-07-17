@@ -18,8 +18,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef PMW3360_LIB
-#define PMW3360_LIB
+#ifndef PMW3360_ROUTER_LIB
+#define PMW3360_ROUTER_LIB
 
 #if ARDUINO >= 100
  #include "Arduino.h"
@@ -136,7 +136,6 @@ public:
   // setCPI: get CPI value (it does read CPI register from the module)
   unsigned int getCPI();
   PMW3360_DATA readBurst();
-  PMW3360_DATA readBurst_simple();
   byte readReg(byte reg_addr);
   void writeReg(byte reg_addr, byte data);
   void prepareImage();
